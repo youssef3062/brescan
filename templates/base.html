@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Brescan — {{ title or 'One scan saves life' }}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark brescan-nav">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="{{ url_for('scanner_gate') }}">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" class="logo me-2">
+        <div>
+          <div style="font-weight:700">Brescan</div>
+          <small style="font-size:11px">one scan, saves life</small>
+        </div>
+      </a>
+
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <a class="nav-link text-light" href="#" id="download-app">Download our app</a>
+        {% if session.role == 'operator' %}
+          <span class="text-white">Operator: {{ session.username }}</span>
+          <div class="dropdown d-inline-block">
+            <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-cog me-1"></i>Menu
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{{ url_for('operator_dashboard') }}">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+              </a></li>
+              <li><a class="dropdown-item" href="{{ url_for('analytics_dashboard') }}">
+                <i class="fas fa-chart-line me-2"></i>Analytics
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+              </a></li>
+            </ul>
+          </div>
+        {% elif session.role == 'patient' %}
+          <span class="text-white">Patient: {{ session.username }}</span>
+          <a class="btn btn-outline-light btn-sm" href="{{ url_for('dashboard', qr_id=session.qr_id) }}">My Data</a>
+        {% endif %}
+        <a class="btn btn-light btn-sm" href="{{ url_for('scanner_gate') }}">Scan</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info fade-in">
+          {% for m in messages %}{{ m }}<br>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="text-center py-3">
+    <small>© Brescan — one scan, saves life</small>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script>
+    // placeholder for download app link — change later to your actual url
+    document.getElementById('download-app')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Download link placeholder — you can add your app link later.');
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

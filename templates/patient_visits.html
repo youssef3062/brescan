@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="medical-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-history text-primary me-2"></i>
+                            Patient Visits
+                        </h2>
+                        <p class="text-muted mb-0">{{ patient['name'] }} - Medical Visit History</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-outline-secondary" href="{{ url_for('operator_dashboard') }}">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                        <a class="btn btn-success" href="{{ url_for('add_visit', qr_id=qr_id) }}">
+                            <i class="fas fa-plus me-2"></i>Add New Visit
+                        </a>
+                        <a class="btn btn-primary" href="{{ url_for('export_visits', qr_id=qr_id) }}">
+                            <i class="fas fa-download me-2"></i>Export CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visits Timeline -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-check text-primary me-2"></i>
+                        Visit History ({{ visits|length }} visits)
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if visits %}
+                    <div class="timeline">
+                        {% for v in visits %}
+                        <div class="timeline-item slide-in">
+                            <div class="visit-card">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-calendar-check text-primary me-2"></i>
+                                            {{ v['visit_date'] }}
+                                        </h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-user-md me-1"></i>
+                                            Recorded by: {{ v['created_by'] or 'System' }}
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-primary">Visit #{{ loop.revindex }}</span>
+                                </div>
+                                
+                                {% if v['diagnosis'] %}
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-stethoscope text-primary me-2 mt-1" style="width: 16px;"></i>
+                                        <div class="flex-grow-1">
+                                            <strong class="text-primary d-block">Diagnosis:</strong>
+                                            <p class="mb-0">{{ v['diagnosis'] }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if v['treatment'] %}
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-heartbeat text-success me-2 mt-1" style="width: 16px;"></i>
+                                        <div class="flex-grow-1">
+                                            <strong class="text-success d-block">Treatment:</strong>
+                                            <p class="mb-0">{{ v['treatment'] }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if v['medicines'] %}
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-pills text-warning me-2 mt-1" style="width: 16px;"></i>
+                                        <div class="flex-grow-1">
+                                            <strong class="text-warning d-block">Medicines:</strong>
+                                            <p class="mb-0">{{ v['medicines'] }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if v['lab_file'] %}
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-primary btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#labModal{{ loop.index }}">
+                                        <i class="fas fa-file-medical me-2"></i>
+                                        View Lab Report
+                                    </button>
+                                </div>
+                                
+                                <!-- Lab Report Modal -->
+                                <div class="modal fade" id="labModal{{ loop.index }}" tabindex="-1">
+                                    <div class="modal-dialog modal-xl">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">
+                                                    <i class="fas fa-file-medical me-2"></i>
+                                                    Lab Report - {{ v['visit_date'] }}
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body p-0">
+                                                <iframe src="{{ url_for('labs', filename=v['lab_file']) }}" 
+                                                        width="100%" height="600px" 
+                                                        style="border: none;"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-clipboard-list text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3 text-muted">No visits recorded yet</h4>
+                        <p class="text-muted">This patient hasn't had any medical visits recorded in the system.</p>
+                        <a class="btn btn-primary" href="{{ url_for('add_visit', qr_id=qr_id) }}">
+                            <i class="fas fa-plus me-2"></i>Add First Visit
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Floating Button -->
+<div class="position-fixed" style="bottom: 2rem; right: 2rem; z-index: 1000;">
+    <div class="dropdown">
+        <button class="btn btn-primary rounded-circle" style="width: 60px; height: 60px;" 
+                data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-plus"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ url_for('add_visit', qr_id=qr_id) }}">
+                <i class="fas fa-plus me-2"></i>Add Visit
+            </a></li>
+            <li><a class="dropdown-item" href="{{ url_for('operator_edit', qr_id=qr_id) }}">
+                <i class="fas fa-edit me-2"></i>Edit Patient
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ url_for('export_visits', qr_id=qr_id) }}">
+                <i class="fas fa-download me-2"></i>Export Data
+            </a></li>
+            <li><a class="dropdown-item" href="{{ url_for('operator_dashboard') }}">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

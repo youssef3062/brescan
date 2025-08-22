@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="medical-card mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-user-edit text-primary me-2"></i>
+                            Edit Patient Information
+                        </h2>
+                        <p class="text-muted mb-0">{{ patient['name'] }} - Update Medical Records</p>
+                    </div>
+                    <a class="btn btn-outline-secondary" href="{{ url_for('operator_dashboard') }}">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit text-primary me-2"></i>
+                        Patient Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="row">
+                            <!-- Chronic Diseases -->
+                            <div class="col-12 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Chronic Diseases
+                                </label>
+                                <textarea class="form-control" name="chronic_diseases" rows="3" 
+                                          placeholder="Enter chronic diseases or conditions">{{ patient['chronic_diseases'] or '' }}</textarea>
+                                <small class="text-muted">List any chronic conditions or diseases</small>
+                            </div>
+                            
+                            <!-- Medications -->
+                            <div class="col-12 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-pills text-primary me-2"></i>
+                                    Current Medications
+                                </label>
+                                <textarea class="form-control" name="medications" rows="3" 
+                                          placeholder="Enter current medications">{{ patient['medications'] or '' }}</textarea>
+                                <small class="text-muted">List all current medications and dosages</small>
+                            </div>
+                            
+                            <!-- Emergency Contact -->
+                            <div class="col-12 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-phone-alt text-danger me-2"></i>
+                                    Emergency Contact
+                                </label>
+                                <input class="form-control" name="emergency_contact" 
+                                       placeholder="Emergency contact information" 
+                                       value="{{ patient['emergency_contact'] or '' }}">
+                                <small class="text-muted">Name and phone number of emergency contact</small>
+                            </div>
+                            
+                            <!-- Patient Photo Upload -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-camera text-info me-2"></i>
+                                    Patient Photo
+                                </label>
+                                <div class="input-group">
+                                    <input class="form-control" type="file" name="patient_photo" accept="image/*">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="clearPhoto()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Upload a clear photo of the patient</small>
+                                {% if patient['patient_photo'] %}
+                                <div class="mt-2">
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Current photo uploaded
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Lab File Upload -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-file-medical text-info me-2"></i>
+                                    Upload Lab Report (PDF)
+                                </label>
+                                <div class="input-group">
+                                    <input class="form-control" type="file" name="lab_file" accept=".pdf">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="clearFile()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Upload new lab results or medical reports</small>
+                                {% if patient['lab_file'] %}
+                                <div class="mt-2">
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Current file: {{ patient['lab_file'] }}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Other Information -->
+                            <div class="col-12 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-info-circle text-info me-2"></i>
+                                    Additional Information
+                                </label>
+                                <textarea class="form-control" name="other_info" rows="4" 
+                                          placeholder="Any additional medical information, allergies, or notes">{{ patient['other_info'] or '' }}</textarea>
+                                <small class="text-muted">Include allergies, special instructions, or other relevant information</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3 justify-content-end">
+                            <a class="btn btn-secondary" href="{{ url_for('operator_dashboard') }}">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function clearFile() {
+    document.querySelector('input[name="lab_file"]').value = '';
+}
+
+function clearPhoto() {
+    document.querySelector('input[name="patient_photo"]').value = '';
+}
+</script>
+{% endblock %}

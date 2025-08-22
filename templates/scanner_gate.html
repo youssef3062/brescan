@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center fade-in">
+                <!-- Logo and Header -->
+                <div class="mb-4">
+                    <img src="{{ url_for('static', filename='logo.png') }}" class="mb-3" style="height: 100px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
+                    <h1 class="display-5 fw-bold text-primary mb-2">One scan, saves life</h1>
+                    <p class="lead text-muted">Point the camera at the patient QR code to access medical information</p>
+                </div>
+
+                <!-- QR Scanner -->
+                <div class="card mb-4">
+                    <div class="card-header text-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-qrcode text-primary me-2"></i>
+                            QR Code Scanner
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+                    <a class="btn btn-primary btn-lg" href="{{ url_for('operator_login') }}">
+                        <i class="fas fa-user-md me-2"></i>Operator Login
+                    </a>
+                    <a class="btn btn-ghost btn-lg" href="{{ url_for('create_operator') }}">
+                        <i class="fas fa-user-plus me-2"></i>Create Operator
+                    </a>
+                    <button class="btn btn-outline-primary btn-lg" onclick="openManual()">
+                        <i class="fas fa-keyboard me-2"></i>Enter QR Manually
+                    </button>
+                </div>
+
+                <!-- Manual Entry Form -->
+                <div id="manual" class="card d-none slide-in">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-edit text-primary me-2"></i>
+                            Manual QR Entry
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="manualForm" onsubmit="manualSubmit(event)" class="d-flex gap-2">
+                            <input id="manualInput" class="form-control" placeholder="Enter QR ID (e.g. BRESCAN-0001)" required>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-arrow-right me-2"></i>Go
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Help Text -->
+                <div class="text-muted small">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Tip: QR code images are available in <code>/static/qrcodes</code> directory
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function onScanSuccess(decodedText, decodedResult) {
+    // Add loading animation
+    document.getElementById('reader').classList.add('loading');
+    
+    // Redirect after a short delay to show loading state
+    setTimeout(() => {
+        window.location.href = '/access/' + encodeURIComponent(decodedText);
+    }, 500);
+}
+
+// Initialize QR Scanner
+let html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+    fps: 10, 
+    qrbox: { width: 280, height: 280 },
+    aspectRatio: 1.0
+});
+html5QrcodeScanner.render(onScanSuccess);
+
+// Manual entry functions
+function openManual() {
+    const manualDiv = document.getElementById('manual');
+    manualDiv.classList.toggle('d-none');
+    
+    if (!manualDiv.classList.contains('d-none')) {
+        document.getElementById('manualInput').focus();
+    }
+}
+
+function manualSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('manualInput').value.trim();
+    
+    if (!id) {
+        alert('Please enter a QR ID');
+        return;
+    }
+    
+    // Add loading state
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+    submitBtn.disabled = true;
+    
+    // Redirect
+    setTimeout(() => {
+        location.href = '/access/' + encodeURIComponent(id);
+    }, 500);
+}
+</script>
+{% endblock %}

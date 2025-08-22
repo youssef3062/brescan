@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mx-auto p-4" style="max-width:480px;">
+  <h4>Create Operator (protected)</h4>
+  <form method="post">
+    <div class="mb-2"><label>Master Key</label><input class="form-control" name="master_key" type="password" required></div>
+    <div class="mb-2"><label>Operator username</label><input class="form-control" name="username" required></div>
+    <div class="mb-2"><label>Password</label><input class="form-control" name="password" type="password" required></div>
+    <div><button class="btn btn-primary">Create Operator</button> <a class="btn btn-link" href="{{ url_for('scanner_gate') }}">Cancel</a></div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='logo.png') }}" class="mb-3" style="height: 80px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
+                <h2 class="text-primary">Patient Login</h2>
+                <p class="text-muted">Access your medical records and visit history</p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header text-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle text-primary me-2"></i>
+                        Sign In
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-user text-primary me-2"></i>
+                                Username
+                            </label>
+                            <input class="form-control" name="username" required 
+                                   placeholder="Enter your username">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-lock text-primary me-2"></i>
+                                Password
+                            </label>
+                            <input class="form-control" name="password" type="password" required 
+                                   placeholder="Enter your password">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </button>
+                            <a class="btn btn-outline-secondary" href="{{ url_for('scanner_gate') }}">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Scanner
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Your medical data is secure and encrypted
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

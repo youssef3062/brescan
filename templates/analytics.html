@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="medical-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            Analytics Dashboard
+                        </h2>
+                        <p class="text-muted mb-0">Comprehensive insights into your medical system performance</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary" onclick="refreshData()">
+                            <i class="fas fa-sync-alt me-2"></i>Refresh
+                        </button>
+                        <a class="btn btn-success" href="{{ url_for('operator_dashboard') }}">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="display-6 text-primary mb-2">{{ data.total_patients }}</div>
+                    <h6 class="card-title">Total Patients</h6>
+                    <small class="text-muted">Registered in system</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="display-6 text-success mb-2">{{ data.total_visits }}</div>
+                    <h6 class="card-title">Total Visits</h6>
+                    <small class="text-muted">Medical consultations</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="display-6 text-warning mb-2">{{ data.total_scans }}</div>
+                    <h6 class="card-title">QR Scans</h6>
+                    <small class="text-muted">Total code scans</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="display-6 text-info mb-2">{{ data.recent_visits }}</div>
+                    <h6 class="card-title">Recent Visits</h6>
+                    <small class="text-muted">Last 30 days</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Monthly Trends Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area text-primary me-2"></i>
+                        Monthly Visit Trends
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyTrendsChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gender Distribution -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie text-primary me-2"></i>
+                        Gender Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="genderChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables Row -->
+    <div class="row">
+        <!-- Top Operators -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-md text-primary me-2"></i>
+                        Top Healthcare Providers
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Provider</th>
+                                    <th>Visits</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for operator in data.top_operators %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-user-md text-primary me-2"></i>
+                                        {{ operator.operator }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ operator.visits }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-primary" 
+                                                 style="width: {{ (operator.visits / data.total_visits * 100) if data.total_visits > 0 else 0 }}%">
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ "%.1f"|format((operator.visits / data.total_visits * 100) if data.total_visits > 0 else 0) }}%</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Patients -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users text-primary me-2"></i>
+                        Recent Patients
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>QR ID</th>
+                                    <th>Visits</th>
+                                    <th>Contact</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in data.recent_patients %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-user text-primary me-2"></i>
+                                        {{ patient.name }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ patient.qr_id }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ patient.visits }}</span>
+                                    </td>
+                                    <td>
+                                        {% if patient.phone %}
+                                        <small class="text-muted">{{ patient.phone }}</small>
+                                        {% else %}
+                                        <small class="text-muted">No phone</small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Analytics -->
+    <div class="row">
+        <!-- Blood Type Distribution -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tint text-danger me-2"></i>
+                        Blood Type Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for blood_type in data.blood_type_distribution %}
+                        <div class="col-6 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-danger">{{ blood_type.type }}</span>
+                                <span class="fw-bold">{{ blood_type.count }}</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 6px;">
+                                <div class="progress-bar bg-danger" 
+                                     style="width: {{ (blood_type.count / data.total_patients * 100) if data.total_patients > 0 else 0 }}%">
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top QR Codes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-qrcode text-primary me-2"></i>
+                        Most Scanned QR Codes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>QR Code</th>
+                                    <th>Scans</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for qr in data.top_qr_codes %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-qrcode text-primary me-2"></i>
+                                        {{ qr.qr_id }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">{{ qr.scans }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js for data visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Monthly Trends Chart
+const monthlyCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
+const monthlyData = {{ data.monthly_trends | tojson }};
+
+new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: monthlyData.map(item => item.month),
+        datasets: [{
+            label: 'Visits',
+            data: monthlyData.map(item => item.count),
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// Gender Distribution Chart
+const genderCtx = document.getElementById('genderChart').getContext('2d');
+const genderData = {{ data.gender_distribution | tojson }};
+
+new Chart(genderCtx, {
+    type: 'doughnut',
+    data: {
+        labels: genderData.map(item => item.gender),
+        datasets: [{
+            data: genderData.map(item => item.count),
+            backgroundColor: [
+                '#2563eb',
+                '#ec4899',
+                '#10b981'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Refresh data function
+function refreshData() {
+    location.reload();
+}
+
+// Auto-refresh every 5 minutes
+setInterval(refreshData, 300000);
+</script>
+{% endblock %}

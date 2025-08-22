@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="medical-card mb-4">
+                <div class="text-center">
+                    <h2 class="mb-1">
+                        <i class="fas fa-user-plus text-primary me-2"></i>
+                        Patient Registration
+                    </h2>
+                    <p class="text-muted mb-0">QR Code: <span class="badge bg-primary">{{ qr_id }}</span></p>
+                </div>
+            </div>
+
+            <!-- Registration Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit text-primary me-2"></i>
+                        Patient Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-user text-primary me-2"></i>
+                                    Username *
+                                </label>
+                                <input class="form-control" name="username" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-lock text-primary me-2"></i>
+                                    Password *
+                                </label>
+                                <input class="form-control" name="password" required type="password">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-id-card text-primary me-2"></i>
+                                    Full Name *
+                                </label>
+                                <input class="form-control" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-phone text-primary me-2"></i>
+                                    Phone Number
+                                </label>
+                                <input class="form-control" name="phone">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                    Email
+                                </label>
+                                <input class="form-control" name="email" type="email">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-birthday-cake text-primary me-2"></i>
+                                    Birthdate
+                                </label>
+                                <input class="form-control" name="birthdate" type="date">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-venus-mars text-primary me-2"></i>
+                                    Gender
+                                </label>
+                                <select class="form-select" name="gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-tint text-danger me-2"></i>
+                                    Blood Type
+                                </label>
+                                <input class="form-control" name="blood_type" placeholder="e.g., A+, B-, O+">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-pills text-warning me-2"></i>
+                                    Monthly Pills
+                                </label>
+                                <input class="form-control" name="monthly_pills" type="number" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-pills text-primary me-2"></i>
+                                    Current Medications
+                                </label>
+                                <input class="form-control" name="medications" placeholder="List current medications">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Chronic Diseases
+                                </label>
+                                <input class="form-control" name="chronic_diseases" placeholder="Any chronic conditions">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-phone-alt text-danger me-2"></i>
+                                    Emergency Contact
+                                </label>
+                                <input class="form-control" name="emergency_contact" placeholder="Emergency contact info">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-camera text-info me-2"></i>
+                                    Patient Photo
+                                </label>
+                                <input class="form-control" name="patient_photo" type="file" accept="image/*">
+                                <small class="text-muted">Upload a clear photo of the patient</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-file-medical text-info me-2"></i>
+                                    Upload Lab Report (PDF)
+                                </label>
+                                <input class="form-control" name="lab_file" type="file" accept=".pdf">
+                                <small class="text-muted">Upload any existing lab reports or medical documents</small>
+                            </div>
+                            <div class="col-12 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-info-circle text-info me-2"></i>
+                                    Other Information
+                                </label>
+                                <textarea class="form-control" name="other_info" rows="3" 
+                                          placeholder="Any additional medical information, allergies, or notes"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a class="btn btn-secondary" href="{{ url_for('scanner_gate') }}">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-user-plus me-2"></i>Register Patient
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
