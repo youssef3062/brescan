@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5 text-center">
+    <h2 class="mb-4">Choose Access for QR: {{ qr_id }}</h2>
+    <div class="d-flex flex-column gap-3 justify-content-center align-items-center">
+        <a href="{{ url_for('guest_view', qr_id=qr_id) }}" class="btn btn-outline-primary btn-lg w-50">
+            <i class="fas fa-eye me-2"></i> Guest View
+        </a>
+        <a href="{{ url_for('login', qr_id=qr_id) }}" class="btn btn-primary btn-lg w-50">
+            <i class="fas fa-user me-2"></i> Patient Login
+        </a>
+        <a href="{{ url_for('doctor_login', qr_id=qr_id) }}" class="btn btn-success btn-lg w-50">
+            <i class="fas fa-stethoscope me-2"></i> Doctor Login
+        </a>
+        <a href="{{ url_for('operator_login') }}" class="btn btn-dark btn-lg w-50">
+            <i class="fas fa-user-cog me-2"></i> Operator Login
+        </a>
+    </div>
+</div>
+{% endblock %}

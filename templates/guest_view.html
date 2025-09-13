@@ -3,41 +3,55 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
+
+            <!-- Logo + Header -->
             <div class="text-center mb-4">
-                <img src="{{ url_for('static', filename='logo.png') }}" class="mb-3" style="height: 80px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
-                <h2 class="text-primary">Patient Information</h2>
-                <p class="text-muted">QR Code: <span class="badge bg-primary">{{ qr_id }}</span></p>
+                <img src="{{ url_for('static', filename='logo.png') }}" 
+                     alt="Brescan Logo" class="mb-3"
+                     style="height: 80px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
+                <h2 class="fw-bold text-primary">Patient Information</h2>
+                <p class="text-muted">QR Code: 
+                    <span class="badge bg-primary">{{ qr_id }}</span>
+                </p>
             </div>
-            
+
             <!-- Patient Photo -->
             <div class="text-center mb-4">
                 {% if patient.patient_photo %}
                 <img src="{{ url_for('photos', filename=patient.patient_photo) }}" 
-                     alt="Patient Photo" class="patient-photo-large">
+                     alt="Patient Photo" class="rounded-circle shadow"
+                     style="width: 130px; height: 130px; object-fit: cover;">
                 {% else %}
-                <div class="patient-avatar-large">
+                <div class="d-flex align-items-center justify-content-center rounded-circle shadow"
+                     style="width: 130px; height: 130px; background:#CAD6FF; font-size:50px; color:#2260FF;">
                     <i class="fas fa-user"></i>
                 </div>
                 {% endif %}
             </div>
-            
-            <div class="card">
-                <div class="card-header text-center">
-                    <h5 class="mb-0">
+
+            <!-- Patient Info Card -->
+            <div class="card shadow border-0">
+                <div class="card-header text-center bg-light">
+                    <h5 class="mb-0 fw-bold">
                         <i class="fas fa-user text-primary me-2"></i>
                         Basic Patient Information
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
+                        <!-- Name -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Patient Name:</label>
                             <p class="mb-0">{{ patient.name }}</p>
                         </div>
+
+                        <!-- Age -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Age:</label>
                             <p class="mb-0">{{ age or 'N/A' }} years old</p>
                         </div>
+
+                        <!-- Blood Type -->
                         {% if patient.blood_type %}
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Blood Type:</label>
@@ -46,6 +60,8 @@
                             </p>
                         </div>
                         {% endif %}
+
+                        <!-- Chronic Diseases -->
                         {% if patient.chronic_diseases %}
                         <div class="col-12 mb-3">
                             <label class="form-label fw-bold">Chronic Conditions:</label>
@@ -55,6 +71,8 @@
                             </div>
                         </div>
                         {% endif %}
+
+                        <!-- Emergency Contact -->
                         {% if patient.emergency_contact %}
                         <div class="col-12 mb-3">
                             <label class="form-label fw-bold">Emergency Contact:</label>
@@ -65,22 +83,42 @@
                         </div>
                         {% endif %}
                     </div>
-                    
+
                     <hr>
-                    
+
+                    <!-- Action Buttons -->
                     <div class="text-center">
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <a class="btn btn-primary" href="{{ url_for('login_patient', qr_id=qr_id) }}">
-                                <i class="fas fa-sign-in-alt me-2"></i>Patient Login
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+
+                            <!-- Patient Login -->
+                            <a class="btn btn-primary shadow-sm px-4" style="background:#2260FF; border:none;" 
+                               href="{{ url_for('login', qr_id=qr_id) }}">
+                                <i class="fas fa-sign-in-alt me-2"></i> Patient Login
                             </a>
-                            <a class="btn btn-outline-secondary" href="{{ url_for('scanner_gate') }}">
-                                <i class="fas fa-qrcode me-2"></i>Scan Another QR
+
+                            <!-- Doctor Login -->
+                            {% if qr_id %}
+                            <a class="btn btn-success shadow-sm px-4" style="background:#28a745; border:none;" 
+                               href="{{ url_for('doctor_login', qr_id=qr_id) }}">
+                                <i class="fas fa-user-md me-2"></i> Doctor Login
+                            </a>
+                            {% else %}
+                            <a class="btn btn-success shadow-sm px-4 disabled" style="background:#28a745; border:none;" 
+                               href="#">
+                                <i class="fas fa-user-md me-2"></i> Doctor Login
+                            </a>
+                            {% endif %}
+
+                            <!-- Scan Another QR -->
+                            <a class="btn btn-outline-secondary shadow-sm px-4" href="{{ url_for('scanner_gate') }}">
+                                <i class="fas fa-qrcode me-2"></i> Scan Another QR
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Footer Note -->
             <div class="text-center mt-3">
                 <small class="text-muted">
                     <i class="fas fa-info-circle me-1"></i>

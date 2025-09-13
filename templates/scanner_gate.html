@@ -4,9 +4,11 @@
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
             <div class="text-center fade-in">
+
                 <!-- Logo and Header -->
                 <div class="mb-4">
-                    <img src="{{ url_for('static', filename='logo.png') }}" class="mb-3" style="height: 100px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
+                    <img src="{{ url_for('static', filename='logo.png') }}" class="mb-3"
+                         style="height: 100px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">
                     <h1 class="display-5 fw-bold text-primary mb-2">One scan, saves life</h1>
                     <p class="lead text-muted">Point the camera at the patient QR code to access medical information</p>
                 </div>
@@ -20,7 +22,14 @@
                         </h5>
                     </div>
                     <div class="card-body p-4">
-                        <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+                        <div id="reader" style="width: 100%; max-width: 600px; margin: auto;"></div>
+
+                        <!-- Zoom Control -->
+                        <div class="mt-3">
+                            <label for="zoomRange" class="form-label">Zoom</label>
+                            <input type="range" id="zoomRange" min="1" max="5" step="0.1" value="1"
+                                   class="form-range" onchange="setZoom(this.value)">
+                        </div>
                     </div>
                 </div>
 
@@ -47,7 +56,8 @@
                     </div>
                     <div class="card-body">
                         <form id="manualForm" onsubmit="manualSubmit(event)" class="d-flex gap-2">
-                            <input id="manualInput" class="form-control" placeholder="Enter QR ID (e.g. BRESCAN-0001)" required>
+                            <input id="manualInput" class="form-control"
+                                   placeholder="Enter QR ID (e.g. BRESCAN-0001)" required>
                             <button class="btn btn-primary" type="submit">
                                 <i class="fas fa-arrow-right me-2"></i>Go
                             </button>
@@ -67,30 +77,81 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
+const qrRegionId = "reader";
+const html5QrCode = new Html5Qrcode(qrRegionId);
+let currentTrack = null;
+
 function onScanSuccess(decodedText, decodedResult) {
-    // Add loading animation
-    document.getElementById('reader').classList.add('loading');
-    
-    // Redirect after a short delay to show loading state
-    setTimeout(() => {
-        window.location.href = '/access/' + encodeURIComponent(decodedText);
-    }, 500);
+    html5QrCode.stop().then(() => {
+        window.location.href = "/access/" + encodeURIComponent(decodedText);
+    }).catch(err => console.error("Stop failed:", err));
 }
 
-// Initialize QR Scanner
-let html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-    fps: 10, 
-    qrbox: { width: 280, height: 280 },
-    aspectRatio: 1.0
-});
-html5QrcodeScanner.render(onScanSuccess);
+function onScanFailure(error) {
+    // ignore frame decode errors
+}
+
+function startScanner() {
+    Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+            let backCam = devices.find(d => d.label.toLowerCase().includes("back"));
+            let cameraId = backCam ? backCam.id : devices[0].id;
+
+            html5QrCode.start(
+                cameraId,
+                {
+                    fps: 15,
+                    qrbox: undefined, // full frame scanning
+                    aspectRatio: 1.777,
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    videoConstraints: {
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 },
+                        facingMode: "environment"
+                    }
+                },
+                onScanSuccess,
+                onScanFailure
+            ).then(() => {
+                // get the video track for zoom control
+                const stream = document.querySelector("#" + qrRegionId + " video").srcObject;
+                if (stream) {
+                    currentTrack = stream.getTracks()[0];
+                    const capabilities = currentTrack.getCapabilities();
+                    if (capabilities.zoom) {
+                        document.getElementById("zoomRange").min = capabilities.zoom.min;
+                        document.getElementById("zoomRange").max = capabilities.zoom.max;
+                        document.getElementById("zoomRange").step = capabilities.zoom.step || 0.1;
+                    } else {
+                        document.getElementById("zoomRange").disabled = true;
+                    }
+                }
+            });
+        } else {
+            alert("No camera found!");
+        }
+    }).catch(err => {
+        console.error(err);
+        alert("Unable to access camera. Please allow camera permissions.");
+    });
+}
+
+async function setZoom(level) {
+    if (currentTrack) {
+        try {
+            await currentTrack.applyConstraints({ advanced: [{ zoom: level }] });
+        } catch (err) {
+            console.warn("Zoom not supported:", err);
+        }
+    }
+}
 
 // Manual entry functions
 function openManual() {
     const manualDiv = document.getElementById('manual');
     manualDiv.classList.toggle('d-none');
-    
     if (!manualDiv.classList.contains('d-none')) {
         document.getElementById('manualInput').focus();
     }
@@ -99,22 +160,19 @@ function openManual() {
 function manualSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('manualInput').value.trim();
-    
     if (!id) {
         alert('Please enter a QR ID');
         return;
     }
-    
-    // Add loading state
     const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
     submitBtn.disabled = true;
-    
-    // Redirect
     setTimeout(() => {
         location.href = '/access/' + encodeURIComponent(id);
-    }, 500);
+    }, 300);
 }
+
+// Start scanning on load
+startScanner();
 </script>
 {% endblock %}

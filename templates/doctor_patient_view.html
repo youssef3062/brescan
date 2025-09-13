@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+
+  <!-- Doctor Info -->
+  <div class="text-center mb-4">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 70px;" class="mb-3">
+    <h2 class="text-primary">
+      <i class="fas fa-user-md me-2"></i> Doctor Dashboard
+    </h2>
+    <p class="text-muted">
+      Welcome, Dr. {{ doctor.full_name }} ({{ doctor.specialty }})
+    </p>
+  </div>
+
+  <!-- Doctor Card -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+      <i class="fas fa-id-card me-2"></i> Doctor Info
+    </div>
+    <div class="card-body">
+      <p><strong>ID:</strong> {{ doctor.id }}</p>
+      <p><strong>Name:</strong> {{ doctor.full_name }}</p>
+      <p><strong>Specialty:</strong> {{ doctor.specialty }}</p>
+      <p><strong>Email:</strong> {{ doctor.email or 'N/A' }}</p>
+      <p><strong>Phone:</strong> {{ doctor.phone or 'N/A' }}</p>
+    </div>
+  </div>
+
+  <!-- Patient Info -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+      <i class="fas fa-user me-2"></i> Patient Info
+    </div>
+    <div class="card-body">
+      <p><strong>QR ID:</strong> {{ qr_id }}</p>
+      <p><strong>Name:</strong> {{ patient.name }}</p>
+      <p><strong>Email:</strong> {{ patient.email or 'N/A' }}</p>
+      <p><strong>Phone:</strong> {{ patient.phone or 'N/A' }}</p>
+      <p><strong>Chronic Diseases:</strong> {{ patient.chronic_diseases or 'None' }}</p>
+      <p><strong>Medications:</strong> {{ patient.medications or 'None' }}</p>
+      <p><strong>Emergency Contact:</strong> {{ patient.emergency_contact or 'N/A' }}</p>
+      <p><strong>Other Info:</strong> {{ patient.other_info or 'N/A' }}</p>
+    </div>
+  </div>
+
+  <!-- Add Visit -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-warning">
+      <i class="fas fa-notes-medical me-2"></i> Add New Visit
+    </div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">Visit Date</label>
+          <input type="date" name="visit_date" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Diagnosis</label>
+          <input type="text" name="diagnosis" class="form-control" placeholder="Enter diagnosis">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Treatment / Notes</label>
+          <textarea name="treatment" class="form-control" rows="3" placeholder="Enter treatment plan or notes"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Upload Lab Reports (PDF)</label>
+          <input type="file" name="lab_files" class="form-control" multiple accept=".pdf">
+        </div>
+        <button type="submit" class="btn btn-success">
+          <i class="fas fa-save me-2"></i> Save Visit
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Visit History -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-secondary text-white">
+      <i class="fas fa-history me-2"></i> Visit History
+    </div>
+    <div class="card-body">
+      {% if visits %}
+        <div class="accordion" id="visitHistoryAccordion">
+          {% for visit in visits %}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="heading{{ loop.index }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                  {{ visit.visit_date }} - {{ visit.diagnosis or 'No diagnosis' }}
+                </button>
+              </h2>
+              <div id="collapse{{ loop.index }}" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                  <p><strong>Diagnosis:</strong> {{ visit.diagnosis or 'N/A' }}</p>
+                  <p><strong>Treatment:</strong> {{ visit.treatment or 'N/A' }}</p>
+                  <p><strong>Created By:</strong> {{ visit.created_by or 'N/A' }}</p>
+
+                  <!-- Lab Reports -->
+                  {% set reports = [] %}
+                  {% for report in visit.lab_reports %}
+                    {% if loop.first %}{% set reports = visit.lab_reports %}{% endif %}
+                  {% endfor %}
+                  {% if reports %}
+                    <hr>
+                    <h6>Lab Reports</h6>
+                    <ul>
+                      {% for report in visit.lab_reports %}
+                        <li>
+                          <a href="{{ url_for('labs', filename=report.file_name) }}" target="_blank">
+                            <i class="fas fa-file-pdf text-danger me-1"></i> {{ report.file_name }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p class="text-muted">No lab reports uploaded.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">No visits recorded for this patient yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Logout -->
+  <div class="text-center">
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">
+      <i class="fas fa-sign-out-alt me-2"></i> Logout
+    </a>
+  </div>
+
+</div>
+{% endblock %}

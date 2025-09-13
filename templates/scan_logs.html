@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h3>Scan Logs for QR: <span class="badge bg-primary">{{ qr_id }}</span></h3>
+  <div class="list-group mt-3">
+    {% for log in logs %}
+      <div class="list-group-item">
+        <strong>{{ log.scanned_by }}</strong>
+        <span class="text-muted float-end">{{ log.timestamp }}</span>
+      </div>
+    {% else %}
+      <div class="alert alert-info">No scans recorded yet.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

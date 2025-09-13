@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+
+  <!-- HEADER -->
+  <div class="text-center mb-5">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" 
+         class="mb-3 shadow-sm rounded-circle" style="height: 80px;">
+    <h2 class="fw-bold text-primary mb-1">
+      <i class="fas fa-user-md me-2"></i> Doctor Dashboard
+    </h2>
+    <p class="text-muted fs-5">
+      Welcome, <strong>Dr. {{ doctor.full_name }}</strong> ({{ doctor.specialty }})
+    </p>
+  </div>
+
+  <!-- DOCTOR INFO -->
+  <div class="card custom-card mb-4">
+    <div class="card-header bg-gradient-primary text-white fw-bold">
+      <i class="fas fa-id-card me-2"></i> Doctor Info
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6"><p><strong>ID:</strong> {{ doctor.id }}</p></div>
+        <div class="col-md-6"><p><strong>Name:</strong> {{ doctor.full_name }}</p></div>
+        <div class="col-md-6"><p><strong>Specialty:</strong> {{ doctor.specialty }}</p></div>
+        <div class="col-md-6"><p><strong>Email:</strong> {{ doctor.email or 'N/A' }}</p></div>
+        <div class="col-md-6"><p><strong>Phone:</strong> {{ doctor.phone or 'N/A' }}</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATIENT INFO -->
+  <div class="card custom-card mb-4 border-success">
+    <div class="card-header bg-gradient-success text-white fw-bold">
+      <i class="fas fa-user me-2"></i> Patient Info
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6"><p><strong>QR ID:</strong> {{ qr_id }}</p></div>
+        <div class="col-md-6"><p><strong>Name:</strong> {{ patient.name }}</p></div>
+        <div class="col-md-6"><p><strong>Email:</strong> {{ patient.email or 'N/A' }}</p></div>
+        <div class="col-md-6"><p><strong>Phone:</strong> {{ patient.phone or 'N/A' }}</p></div>
+        <div class="col-md-6"><p><strong>Chronic Diseases:</strong> {{ patient.chronic_diseases or 'None' }}</p></div>
+        <div class="col-md-6"><p><strong>Medications:</strong> {{ patient.medications or 'None' }}</p></div>
+        <div class="col-md-6"><p><strong>Emergency Contact:</strong> {{ patient.emergency_contact or 'N/A' }}</p></div>
+        <div class="col-md-6"><p><strong>Other Info:</strong> {{ patient.other_info or 'N/A' }}</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAB REPORTS -->
+  <div class="card custom-card mb-4 border-info">
+    <div class="card-header bg-gradient-info text-white fw-bold">
+      <i class="fas fa-vials me-2"></i> Registration Lab Reports
+    </div>
+    <div class="card-body">
+      {% if registration_labs %}
+        <ul class="list-group list-group-flush">
+          {% for lab in registration_labs %}
+            <li class="list-group-item">
+              <a href="{{ url_for('static', filename='labs/' ~ lab.file_name) }}" target="_blank" class="text-decoration-none">
+                <i class="fas fa-file-pdf text-danger me-2"></i> {{ lab.file_name }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted">No lab reports uploaded during registration.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ADD VISIT FORM -->
+  <div class="card custom-card mb-4 border-warning">
+    <div class="card-header bg-gradient-warning fw-bold">
+      <i class="fas fa-notes-medical me-2"></i> Add New Visit
+    </div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">Visit Date</label>
+          <input type="date" name="visit_date" class="form-control shadow-sm" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Diagnosis</label>
+          <input type="text" name="diagnosis" class="form-control shadow-sm" placeholder="Enter diagnosis">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Treatment / Notes</label>
+          <textarea name="treatment" class="form-control shadow-sm" rows="3" placeholder="Enter treatment plan or notes"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Upload Lab Reports (PDF)</label>
+          <input type="file" name="lab_files" class="form-control shadow-sm" multiple accept=".pdf">
+        </div>
+        <button type="submit" class="btn btn-success w-100 shadow-sm">
+          <i class="fas fa-save me-2"></i> Save Visit
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- VISIT HISTORY -->
+  <div class="card custom-card mb-4 border-secondary">
+    <div class="card-header bg-gradient-secondary text-white fw-bold">
+      <i class="fas fa-history me-2"></i> Visit History
+    </div>
+    <div class="card-body">
+      {% if visits %}
+        <div class="accordion" id="visitHistoryAccordion">
+          {% for visit in visits %}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="heading{{ loop.index }}">
+                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                  {{ visit.visit_date }} - {{ visit.diagnosis or 'No diagnosis' }}
+                </button>
+              </h2>
+              <div id="collapse{{ loop.index }}" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                  <p><strong>Diagnosis:</strong> {{ visit.diagnosis or 'N/A' }}</p>
+                  <p><strong>Treatment:</strong> {{ visit.treatment or 'N/A' }}</p>
+                  <p><strong>Created By:</strong> {{ visit.created_by or 'N/A' }}</p>
+                  <h6 class="mt-3">Lab Reports</h6>
+                  {% if visit.lab_reports %}
+                    <ul class="list-group">
+                      {% for report in visit.lab_reports %}
+                        <li class="list-group-item">
+                          <a href="{{ url_for('static', filename='labs/' ~ report.file_name) }}" target="_blank" class="text-decoration-none">
+                            <i class="fas fa-file-pdf text-danger me-2"></i> {{ report.file_name }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p class="text-muted">No lab reports for this visit.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">No visits recorded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- LOGOUT -->
+  <div class="text-center">
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-lg shadow-sm">
+      <i class="fas fa-sign-out-alt me-2"></i> Logout
+    </a>
+  </div>
+
+</div>
+
+<style>
+  body {
+    background: linear-gradient(to bottom right, #f0f4ff, #e9f7f7);
+  }
+  .custom-card {
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    backdrop-filter: blur(5px);
+  }
+  .card-header {
+    font-size: 1.1rem;
+  }
+  .bg-gradient-primary { background: linear-gradient(90deg, #007bff, #0056b3); }
+  .bg-gradient-success { background: linear-gradient(90deg, #28a745, #1d7a34); }
+  .bg-gradient-info { background: linear-gradient(90deg, #17a2b8, #0c7489); }
+  .bg-gradient-warning { background: linear-gradient(90deg, #ffc107, #d39e00); }
+  .bg-gradient-secondary { background: linear-gradient(90deg, #6c757d, #495057); }
+  .accordion-button { font-size: 1rem; }
+</style>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">{{ patient.name }}'s Medical Timeline</h2>
+    <div class="timeline">
+        {% for visit in visits %}
+        <div class="timeline-item">
+            <div class="timeline-date">{{ visit.date }}</div>
+            <div class="timeline-content">
+                <h5>Diagnosis:</h5>
+                <p>{{ visit.diagnosis }}</p>
+                <h5>Treatment:</h5>
+                <p>{{ visit.treatment }}</p>
+                <h5>Medicines:</h5>
+                <p>{{ visit.medicines }}</p>
+                <small>Created by: {{ visit.created_by }}</small>
+
+                {% if visit.labs %}
+                <h6>Lab Reports:</h6>
+                <ul>
+                    {% for lab in visit.labs %}
+                    <li><a href="{{ url_for('labs', filename=lab.file_name) }}" target="_blank">{{ lab.file_name }}</a></li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    margin-left: 20px;
+    border-left: 3px solid #007bff;
+    padding-left: 20px;
+}
+.timeline-item {
+    margin-bottom: 30px;
+    position: relative;
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    background: #007bff;
+    border-radius: 50%;
+}
+.timeline-date {
+    font-weight: bold;
+    color: #007bff;
+}
+</style>
+{% endblock %}
