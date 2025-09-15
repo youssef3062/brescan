@@ -14,7 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the port that the host will map
+# Expose port
 EXPOSE 8080
 
-# Run the Flask app with Gunicorn (production server)
+# Run the app with Gunicorn
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
+
