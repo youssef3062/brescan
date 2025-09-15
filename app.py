@@ -23,14 +23,14 @@ PHOTO_FOLDER = os.path.join(STATIC_DIR, "photos")
 QR_FOLDER = os.path.join(STATIC_DIR, "qrcodes")
 
 ALLOWED_EXT = {"pdf"}
-ALLOWED_PHOTO_EXT = {"jpg", "jpeg", "png", "gif"}
+ALLOWED_PHOTO_EXT = {"jpgapp.secret_key = "BreScanStartupTeen20252ndI", "jpeg", "png", "gif"}
 
 for p in (STATIC_DIR, UPLOAD_FOLDER, PHOTO_FOLDER, QR_FOLDER):
     os.makedirs(p, exist_ok=True)
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.secret_key = "dev-super-secret-change-me"
+"
 
 # Master key to create operators/doctors (used in Part 2/3)
 MASTER_OPERATOR_KEY = "1234"
